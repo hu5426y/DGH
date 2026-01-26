@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  background: #f7f8fa;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.page {
+  padding: 16px;
+}
+
+.section-title {
+  margin: 16px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #323233;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.tag {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #ecf5ff;
+  color: #409eff;
+  margin-right: 6px;
+}
