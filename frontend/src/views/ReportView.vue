@@ -6,6 +6,16 @@
       建议填写完整位置与故障描述，系统将自动匹配维修员并生成处理时限。
     </div>
 
+    <div class="card">
+      <div style="font-weight: 600;">报修指南</div>
+      <div class="ticket-meta">上传现场照片有助于提升派单准确度。</div>
+      <div class="chip-group" style="margin-top: 10px;">
+        <div class="chip">自动识别故障等级</div>
+        <div class="chip alt">位置关联楼宇</div>
+        <div class="chip warn">紧急事项优先</div>
+      </div>
+    </div>
+
     <div class="card form-card">
       <div style="font-weight: 600;">故障信息</div>
       <van-form @submit="onSubmit">

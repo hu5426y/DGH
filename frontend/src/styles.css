@@ -296,9 +296,153 @@ body::before {
   color: #92400e;
 }
 
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(15, 118, 110, 0.16);
+  color: var(--teal-dark);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+}
+
+.pill-soft {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0f4a6d;
+  border-color: rgba(14, 165, 233, 0.2);
+}
+
+.profile-header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  overflow: hidden;
+}
+
+.avatar-fallback {
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 26px;
+  color: var(--teal-dark);
+}
+
+.profile-info {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.profile-sub {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.65);
+}
+
+.profile-badges {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.profile-section {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.profile-panel {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  display: grid;
+  gap: 8px;
+}
+
+.panel-title {
+  font-weight: 600;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-card {
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  display: grid;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--teal-dark);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  cursor: pointer;
+  appearance: none;
+  outline: none;
+}
+
+.chip.alt {
+  background: rgba(14, 165, 233, 0.14);
+  color: #0f4a6d;
+  border-color: rgba(14, 165, 233, 0.2);
+}
+
+.chip.warn {
+  background: rgba(245, 158, 11, 0.16);
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
 @media (max-width: 420px) {
   .metric-grid,
-  .role-grid {
+  .role-grid,
+  .summary-grid {
     grid-template-columns: 1fr;
   }
   .hero-actions {

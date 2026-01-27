@@ -52,11 +52,18 @@ const tabItems = computed(() => {
         { label: '首页', to: '/user/home', icon: 'home-o' },
         { label: '报修', to: '/user/report', icon: 'edit' },
         { label: '工单', to: '/user/tickets', icon: 'records' },
+        { label: '我的', to: '/me', icon: 'contact' },
       ];
     case 'REPAIRER':
-      return [{ label: '维修端', to: '/repairer/home', icon: 'manager' }];
+      return [
+        { label: '维修端', to: '/repairer/home', icon: 'manager' },
+        { label: '我的', to: '/me', icon: 'contact' },
+      ];
     case 'ADMIN':
-      return [{ label: '管理端', to: '/admin/home', icon: 'setting-o' }];
+      return [
+        { label: '管理端', to: '/admin/home', icon: 'setting-o' },
+        { label: '我的', to: '/me', icon: 'contact' },
+      ];
     default:
       return [];
   }

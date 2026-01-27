@@ -2,9 +2,29 @@
   <div class="page">
     <div class="section-title">维修端工作台</div>
 
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">待处理</div>
+        <div class="metric-value">{{ statusCounts.pending }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">处理中</div>
+        <div class="metric-value">{{ statusCounts.inProgress }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">今日完成</div>
+        <div class="metric-value">{{ statusCounts.completed }}</div>
+      </div>
+    </div>
+
     <div class="card">
       <div style="font-weight: 600;">今日作业提示</div>
       <div class="ticket-meta">请及时签到并更新工单状态，系统将自动记录维修时效。</div>
+      <div class="chip-group" style="margin-top: 10px;">
+        <div class="chip">优先处理紧急工单</div>
+        <div class="chip alt">签到即自动刷新状态</div>
+        <div class="chip warn">超时将触发预警</div>
+      </div>
       <div style="display: flex; gap: 8px; margin-top: 10px;">
         <van-field v-model="technicianName" label="维修员" placeholder="输入姓名" />
         <van-field v-model="checkinLocation" label="签到位置" placeholder="输入签到位置" />
@@ -44,13 +64,25 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { api, type Ticket } from '../services/api';
 
 const tickets = ref<Ticket[]>([]);
 const loading = ref(true);
 const technicianName = ref('');
 const checkinLocation = ref('');
+
+const statusCounts = computed(() => {
+  return tickets.value.reduce(
+    (acc, ticket) => {
+      if (ticket.status === 'pending') acc.pending += 1;
+      if (ticket.status === 'in_progress') acc.inProgress += 1;
+      if (ticket.status === 'completed') acc.completed += 1;
+      return acc;
+    },
+    { pending: 0, inProgress: 0, completed: 0 }
+  );
+});
 
 const loadTickets = async () => {
   const response = await api.get('/tickets');
