@@ -14,8 +14,8 @@
 ## 技术选型
 
 - 前端：Vue 3 + TypeScript + Vant + Vite
-- 后端：NestJS + TypeORM (SQLite)
-- 数据库：默认 SQLite（便于本地运行），可扩展到 MySQL；缓存/消息机制可扩展 Redis
+- 后端：Spring Boot + Spring Data JPA
+- 数据库：MySQL（默认账号 root / 密码 123456），缓存/消息机制可扩展 Redis
 
 ## 本地运行
 
@@ -23,16 +23,20 @@
 
 ```bash
 cd backend
-npm install
-npm run start:dev
+mvn spring-boot:run
 ```
 
-默认启动在 `http://localhost:3000`，并自动创建 `data.sqlite`。
+默认启动在 `http://localhost:3000`，数据库连接信息在 `backend/src/main/resources/application.yml`。
+请提前在 MySQL 中创建数据库：
+
+```sql
+CREATE DATABASE dgh DEFAULT CHARACTER SET utf8mb4;
+```
 
 #### 自动派单（可选）
 
 ```bash
-AUTO_ASSIGN_NAME=张师傅 AUTO_ASSIGN_CONTACT=13800000000 npm run start:dev
+AUTO_ASSIGN_NAME=张师傅 AUTO_ASSIGN_CONTACT=13800000000 mvn spring-boot:run
 ```
 
 ### 2. 启动前端
@@ -60,7 +64,7 @@ npm run dev
 
 ```
 .
-├── backend         # NestJS 服务端
+├── backend         # Spring Boot 服务端
 ├── frontend        # Vue3 移动端
 ├── docs            # 说明文档
 └── README.md
@@ -69,6 +73,5 @@ npm run dev
 ## 后续扩展建议
 
 - 引入登录鉴权与权限控制（RBAC）
-- 将 SQLite 替换为 MySQL 并接入 Redis 缓存
+- 接入 Redis 缓存与消息队列优化性能
 - 接入消息通知（短信/企业微信）提升提醒触达
-
