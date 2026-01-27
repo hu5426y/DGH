@@ -1,48 +1,40 @@
 package com.example.dgh.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import java.time.LocalDateTime;
-import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
 
-@Entity
-@Table(name = "check_ins")
+@TableName("check_ins")
 public class CheckIn {
-    @Id
-    @Column(length = 36)
+    @TableId(type = IdType.ASSIGN_UUID)
     private String id;
 
-    @Column(nullable = false)
+    private String ticketId;
+
     private String technicianName;
 
-    @Column(nullable = false)
     private String location;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ticket_id", nullable = false)
-    @JsonBackReference
-    private Ticket ticket;
-
-    @CreationTimestamp
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
-
-    @PrePersist
-    public void prePersist() {
-        if (id == null) {
-            id = UUID.randomUUID().toString();
-        }
-    }
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(String ticketId) {
+        this.ticketId = ticketId;
     }
 
     public String getTechnicianName() {
@@ -61,15 +53,11 @@ public class CheckIn {
         this.location = location;
     }
 
-    public Ticket getTicket() {
-        return ticket;
-    }
-
-    public void setTicket(Ticket ticket) {
-        this.ticket = ticket;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

@@ -1,54 +1,32 @@
 package com.example.dgh.entity;
 
-import com.example.dgh.config.StringListConverter;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.example.dgh.config.StringListTypeHandler;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-@Entity
-@Table(name = "tickets")
+@TableName("tickets")
 public class Ticket {
-    @Id
-    @Column(length = 36)
+    @TableId(type = IdType.ASSIGN_UUID)
     private String id;
 
-    @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Convert(converter = StringListConverter.class)
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @TableField(typeHandler = StringListTypeHandler.class)
     private List<String> images = new ArrayList<>();
 
-    @Column(nullable = false)
-    private String location;
+    private String locationId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private TicketStatus status;
 
-    @Column(nullable = false)
-    private String reporterName;
-
-    @Column(nullable = false)
-    private String reporterContact;
+    private String reporterId;
 
     private String assignedToName;
 
@@ -56,31 +34,32 @@ public class Ticket {
 
     private Integer rating;
 
-    @Column(columnDefinition = "TEXT")
     private String feedback;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @TableField(exist = false)
+    private String locationName;
+
+    @TableField(exist = false)
+    private String reporterName;
+
+    @TableField(exist = false)
+    private String reporterPhone;
+
+    @TableField(exist = false)
     private List<CheckIn> checkIns = new ArrayList<>();
 
-    @CreationTimestamp
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    public void prePersist() {
-        if (id == null) {
-            id = UUID.randomUUID().toString();
-        }
-        if (status == null) {
-            status = TicketStatus.PENDING;
-        }
-    }
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -107,12 +86,12 @@ public class Ticket {
         this.images = images == null ? new ArrayList<>() : images;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLocationId() {
+        return locationId;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
     }
 
     public TicketStatus getStatus() {
@@ -123,20 +102,12 @@ public class Ticket {
         this.status = status;
     }
 
-    public String getReporterName() {
-        return reporterName;
+    public String getReporterId() {
+        return reporterId;
     }
 
-    public void setReporterName(String reporterName) {
-        this.reporterName = reporterName;
-    }
-
-    public String getReporterContact() {
-        return reporterContact;
-    }
-
-    public void setReporterContact(String reporterContact) {
-        this.reporterContact = reporterContact;
+    public void setReporterId(String reporterId) {
+        this.reporterId = reporterId;
     }
 
     public String getAssignedToName() {
@@ -171,20 +142,57 @@ public class Ticket {
         this.feedback = feedback;
     }
 
+    public String getLocationName() {
+        return locationName;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
+    }
+
+    public String getReporterName() {
+        return reporterName;
+    }
+
+    public void setReporterName(String reporterName) {
+        this.reporterName = reporterName;
+    }
+
+    public String getReporterPhone() {
+        return reporterPhone;
+    }
+
+    public void setReporterPhone(String reporterPhone) {
+        this.reporterPhone = reporterPhone;
+    }
+
     public List<CheckIn> getCheckIns() {
         return checkIns;
     }
 
+    public void setCheckIns(List<CheckIn> checkIns) {
+        this.checkIns = checkIns == null ? new ArrayList<>() : checkIns;
+    }
+
     public void addCheckIn(CheckIn checkIn) {
-        checkIns.add(checkIn);
-        checkIn.setTicket(this);
+        if (checkIn != null) {
+            checkIns.add(checkIn);
+        }
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

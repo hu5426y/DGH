@@ -1,7 +1,17 @@
 import axios from 'axios';
+import { getAuth } from './auth';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: '/api',
+});
+
+api.interceptors.request.use((config) => {
+  const auth = getAuth();
+  if (auth?.token) {
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${auth.token}`;
+  }
+  return config;
 });
 
 export interface Ticket {
@@ -9,10 +19,12 @@ export interface Ticket {
   title: string;
   description: string;
   images: string[];
-  location: string;
+  locationId: string;
+  locationName?: string;
   status: 'pending' | 'in_progress' | 'completed';
-  reporterName: string;
-  reporterContact: string;
+  reporterId: string;
+  reporterName?: string;
+  reporterPhone?: string;
   assignedToName?: string;
   assignedToContact?: string;
   rating?: number;

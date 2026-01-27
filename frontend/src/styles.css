@@ -1,32 +1,340 @@
+@import url('https://fonts.googleapis.com/css2?family=LXGW+WenKai&family=ZCOOL+XiaoWei&display=swap');
+
+:root {
+  --ink: #0b0f14;
+  --ink-soft: #18212c;
+  --paper: #f4f1ea;
+  --paper-strong: #ede7dc;
+  --teal: #0f766e;
+  --teal-dark: #0b4f4a;
+  --amber: #f59e0b;
+  --rose: #be123c;
+  --sky: #0ea5e9;
+  --van-primary-color: var(--teal);
+  --van-success-color: #16a34a;
+  --van-warning-color: #d97706;
+  --van-danger-color: #b91c1c;
+  --van-text-color: var(--ink);
+  --van-border-radius-lg: 18px;
+  --van-cell-line-height: 1.4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  background: #f7f8fa;
-  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'LXGW WenKai', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 10% 20%, #d9f0ea 0%, transparent 45%),
+    radial-gradient(circle at 80% 10%, #f7e6bf 0%, transparent 40%),
+    radial-gradient(circle at 40% 80%, #dbeafe 0%, transparent 45%),
+    linear-gradient(135deg, #f8f5ef 0%, #f1efe7 40%, #f8f5ef 100%);
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: linear-gradient(transparent 95%, rgba(15, 23, 42, 0.03) 95%),
+    linear-gradient(90deg, transparent 95%, rgba(15, 23, 42, 0.03) 95%);
+  background-size: 28px 28px;
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding-bottom: 88px;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 8px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--paper);
+  background: linear-gradient(135deg, #0f766e 0%, #0b4f4a 100%);
+  box-shadow: 0 12px 24px rgba(15, 118, 110, 0.24);
+}
+
+.brand-title {
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+.brand-sub {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--teal-dark);
+  border: 1px solid rgba(15, 118, 110, 0.3);
+}
+
+.app-main {
+  padding: 8px 16px 24px;
 }
 
 .page {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .section-title {
-  margin: 16px 0 8px;
   font-size: 16px;
   font-weight: 600;
-  color: #323233;
+  color: var(--ink-soft);
+  letter-spacing: 0.5px;
 }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
   padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.hero {
+  padding: 18px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(14, 165, 233, 0.16));
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  box-shadow: 0 20px 40px rgba(15, 118, 110, 0.12);
+}
+
+.hero-title {
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 24px;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.hero-desc {
+  font-size: 14px;
+  color: rgba(15, 23, 42, 0.7);
+  line-height: 1.6;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric-card {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.flow-list {
+  display: grid;
+  gap: 12px;
+}
+
+.flow-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.flow-index {
+  width: 30px;
+  height: 30px;
+  border-radius: 12px;
+  background: var(--teal);
+  color: var(--paper);
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.role-card {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.role-title {
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .tag {
   font-size: 12px;
   padding: 2px 8px;
-  border-radius: 10px;
-  background: #ecf5ff;
-  color: #409eff;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.12);
+  color: var(--teal-dark);
   margin-right: 6px;
+}
+
+.ticket-card {
+  display: grid;
+  gap: 10px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.ticket-meta {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.timeline {
+  display: grid;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 2px dashed rgba(15, 118, 110, 0.3);
+}
+
+.timeline-item {
+  font-size: 12px;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.glass-tabbar {
+  backdrop-filter: blur(12px);
+  background: rgba(248, 245, 239, 0.92) !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.form-card {
+  display: grid;
+  gap: 12px;
+}
+
+.notice-pill {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(14, 165, 233, 0.12);
+  color: #0b4f4a;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  font-size: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(245, 158, 11, 0.16);
+  color: #92400e;
+}
+
+@media (max-width: 420px) {
+  .metric-grid,
+  .role-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-actions {
+    flex-direction: column;
+  }
+}
+
+.auth-page {
+  padding-top: 24px;
+}
+
+.auth-hero {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.auth-title {
+  font-family: 'ZCOOL XiaoWei', serif;
+  font-size: 26px;
+  letter-spacing: 1px;
+}
+
+.auth-sub {
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.auth-card {
+  padding: 18px 16px 8px;
+}
+
+.auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(15, 23, 42, 0.7);
 }

@@ -10,11 +10,9 @@ public class CreateTicketRequest {
     private String description;
     private List<String> images;
     @NotBlank
-    private String location;
+    private String locationId;
     @NotBlank
-    private String reporterName;
-    @NotBlank
-    private String reporterContact;
+    private String reporterId;
 
     public String getTitle() {
         return title;
@@ -40,27 +38,19 @@ public class CreateTicketRequest {
         this.images = images;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLocationId() {
+        return locationId;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
     }
 
-    public String getReporterName() {
-        return reporterName;
+    public String getReporterId() {
+        return reporterId;
     }
 
-    public void setReporterName(String reporterName) {
-        this.reporterName = reporterName;
-    }
-
-    public String getReporterContact() {
-        return reporterContact;
-    }
-
-    public void setReporterContact(String reporterContact) {
-        this.reporterContact = reporterContact;
+    public void setReporterId(String reporterId) {
+        this.reporterId = reporterId;
     }
 }

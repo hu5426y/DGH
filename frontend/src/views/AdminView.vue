@@ -1,28 +1,47 @@
 <template>
   <div class="page">
     <div class="section-title">管理端</div>
+
     <div class="card">
       <div style="font-weight: 600;">数据统计</div>
-      <van-cell title="总工单" :value="stats.total" />
-      <van-cell title="已完成" :value="stats.completed" />
-      <van-cell title="平均评分" :value="stats.avgRating" />
-      <div v-if="Object.keys(stats.frequentLocations).length" style="margin-top: 8px;">
-        <div style="font-size: 12px; color: #969799;">高频故障点</div>
-        <div v-for="(count, location) in stats.frequentLocations" :key="location" class="tag">
-          {{ location }} · {{ count }}
+      <div class="metric-grid" style="margin-top: 12px;">
+        <div class="metric-card">
+          <div class="metric-value">{{ stats.total }}</div>
+          <div class="metric-label">总工单</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">{{ stats.completed }}</div>
+          <div class="metric-label">已完成</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">{{ stats.avgRating }}</div>
+          <div class="metric-label">平均评分</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-value">{{ Object.keys(stats.frequentLocations).length }}</div>
+          <div class="metric-label">高频故障点</div>
+        </div>
+      </div>
+      <div v-if="Object.keys(stats.frequentLocations).length" style="margin-top: 12px;">
+        <div class="ticket-meta">高频故障点</div>
+        <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">
+          <div v-for="(count, location) in stats.frequentLocations" :key="location" class="tag">
+            {{ location }} · {{ count }}
+          </div>
         </div>
       </div>
     </div>
 
     <div class="section-title">工单分配</div>
-    <div v-for="ticket in tickets" :key="ticket.id" class="card" style="margin-bottom: 12px;">
-      <div style="display: flex; justify-content: space-between;">
+    <div v-for="ticket in tickets" :key="ticket.id" class="card ticket-card">
+      <div class="ticket-header">
         <div>
           <div style="font-weight: 600;">{{ ticket.title }}</div>
-          <div style="font-size: 12px; color: #969799;">{{ ticket.location }}</div>
+          <div class="ticket-meta">{{ ticket.locationName || ticket.locationId }} · {{ formatDate(ticket.createdAt) }}</div>
         </div>
         <van-tag :type="statusTag(ticket.status)">{{ statusText(ticket.status) }}</van-tag>
       </div>
+      <div class="ticket-meta">{{ ticket.description }}</div>
       <van-field v-model="assign.name" label="维修员" placeholder="输入维修员姓名" />
       <van-field v-model="assign.contact" label="联系方式" placeholder="输入联系方式" />
       <van-button size="small" type="primary" @click="assignTicket(ticket.id)">派单</van-button>
@@ -87,6 +106,8 @@ const statusTag = (status: Ticket['status']) => {
       return 'default';
   }
 };
+
+const formatDate = (value: string) => new Date(value).toLocaleString();
 
 onMounted(loadData);
 </script>

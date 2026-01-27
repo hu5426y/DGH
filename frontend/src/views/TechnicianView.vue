@@ -1,27 +1,41 @@
 <template>
   <div class="page">
     <div class="section-title">维修端工作台</div>
+
+    <div class="card">
+      <div style="font-weight: 600;">今日作业提示</div>
+      <div class="ticket-meta">请及时签到并更新工单状态，系统将自动记录维修时效。</div>
+      <div style="display: flex; gap: 8px; margin-top: 10px;">
+        <van-field v-model="technicianName" label="维修员" placeholder="输入姓名" />
+        <van-field v-model="checkinLocation" label="签到位置" placeholder="输入签到位置" />
+      </div>
+    </div>
+
     <van-empty v-if="loading" description="加载中..." />
-    <div v-else>
-      <div v-for="ticket in tickets" :key="ticket.id" class="card" style="margin-bottom: 12px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div v-else class="page">
+      <div v-for="ticket in tickets" :key="ticket.id" class="card ticket-card">
+        <div class="ticket-header">
           <div>
             <div style="font-weight: 600;">{{ ticket.title }}</div>
-            <div style="font-size: 12px; color: #969799;">{{ ticket.location }}</div>
+            <div class="ticket-meta">{{ ticket.locationName || ticket.locationId }} · {{ formatDate(ticket.createdAt) }}</div>
           </div>
           <van-tag :type="statusTag(ticket.status)">{{ statusText(ticket.status) }}</van-tag>
         </div>
-        <p style="margin-top: 8px;">{{ ticket.description }}</p>
-        <van-field v-model="technicianName" label="维修员" placeholder="输入姓名" />
-        <van-field v-model="checkinLocation" label="签到位置" placeholder="输入签到位置" />
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
+        <div>{{ ticket.description }}</div>
+        <div class="ticket-meta">报修人：{{ ticket.reporterName }}</div>
+        <div class="ticket-meta" v-if="ticket.assignedToName">
+          当前负责人：{{ ticket.assignedToName }}
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
           <van-button size="small" type="primary" @click="updateStatus(ticket.id, 'in_progress')">开始处理</van-button>
           <van-button size="small" type="success" @click="updateStatus(ticket.id, 'completed')">完成</van-button>
           <van-button size="small" type="warning" @click="signIn(ticket.id)">打卡签到</van-button>
         </div>
-        <div v-if="ticket.checkIns.length" style="margin-top: 8px;">
-          <div v-for="item in ticket.checkIns" :key="item.id" style="font-size: 12px; color: #969799;">
-            {{ item.technicianName }} 于 {{ new Date(item.createdAt).toLocaleString() }} 在 {{ item.location }} 签到
+
+        <div v-if="ticket.checkIns.length" class="timeline">
+          <div v-for="item in ticket.checkIns" :key="item.id" class="timeline-item">
+            {{ item.technicianName }} · {{ item.location }} · {{ formatDate(item.createdAt) }}
           </div>
         </div>
       </div>
@@ -82,6 +96,8 @@ const statusTag = (status: Ticket['status']) => {
       return 'default';
   }
 };
+
+const formatDate = (value: string) => new Date(value).toLocaleString();
 
 onMounted(loadTickets);
 </script>

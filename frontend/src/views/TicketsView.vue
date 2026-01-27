@@ -2,37 +2,60 @@
   <div class="page">
     <div class="section-title">我的工单</div>
     <van-empty v-if="loading" description="加载中..." />
-    <van-cell-group v-else>
-      <van-cell
-        v-for="ticket in tickets"
-        :key="ticket.id"
-        :title="ticket.title"
-        :label="ticket.description"
-      >
-        <template #right-icon>
+    <div v-else class="page">
+      <div v-for="ticket in tickets" :key="ticket.id" class="card ticket-card">
+        <div class="ticket-header">
+          <div>
+            <div style="font-weight: 600;">{{ ticket.title }}</div>
+            <div class="ticket-meta">{{ ticket.locationName || ticket.locationId }} · {{ formatDate(ticket.createdAt) }}</div>
+          </div>
           <van-tag :type="statusTag(ticket.status)">{{ statusText(ticket.status) }}</van-tag>
-        </template>
-      </van-cell>
-      <div v-for="ticket in tickets" :key="ticket.id + '-detail'" class="card" style="margin: 12px 0;">
-        <p>位置：{{ ticket.location }}</p>
-        <p>报修人：{{ ticket.reporterName }}（{{ ticket.reporterContact }}）</p>
-        <p v-if="ticket.assignedToName">维修员：{{ ticket.assignedToName }} {{ ticket.assignedToContact }}</p>
-        <div v-if="ticket.status === 'completed'" style="margin-top: 12px;">
+        </div>
+
+        <div>{{ ticket.description }}</div>
+        <div v-if="ticket.images.length" style="display: flex; gap: 8px; overflow-x: auto;">
+          <van-image
+            v-for="(img, index) in ticket.images"
+            :key="ticket.id + index"
+            :src="img"
+            width="84"
+            height="84"
+            radius="12"
+            fit="cover"
+          />
+        </div>
+
+        <div class="ticket-meta">
+          报修人：{{ ticket.reporterName }}（{{ ticket.reporterPhone || '未留存' }}）
+        </div>
+        <div v-if="ticket.assignedToName" class="ticket-meta">
+          维修员：{{ ticket.assignedToName }} {{ ticket.assignedToContact || '' }}
+        </div>
+
+        <div v-if="ticket.checkIns.length" class="timeline">
+          <div v-for="item in ticket.checkIns" :key="item.id" class="timeline-item">
+            {{ item.technicianName }} · {{ item.location }} · {{ formatDate(item.createdAt) }}
+          </div>
+        </div>
+
+        <div v-if="ticket.status === 'completed'" class="card" style="padding: 12px;">
           <div v-if="ticket.rating">评分：{{ ticket.rating }} 星</div>
           <div v-else>
+            <div class="ticket-meta">请为本次维修服务打分</div>
             <van-rate v-model="feedback.rating" :count="5" />
             <van-field v-model="feedback.feedback" placeholder="填写评价" />
             <van-button size="small" type="primary" @click="submitFeedback(ticket.id)">提交评价</van-button>
           </div>
         </div>
       </div>
-    </van-cell-group>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue';
 import { api, type Ticket } from '../services/api';
+import { getAuth } from '../services/auth';
 
 const tickets = ref<Ticket[]>([]);
 const loading = ref(true);
@@ -68,7 +91,10 @@ const statusTag = (status: Ticket['status']) => {
 };
 
 const loadTickets = async () => {
-  const response = await api.get('/tickets');
+  const auth = getAuth();
+  const response = await api.get('/tickets', {
+    params: auth?.id ? { reporterId: auth.id } : undefined,
+  });
   tickets.value = response.data;
   loading.value = false;
 };
@@ -79,6 +105,8 @@ const submitFeedback = async (id: string) => {
   feedback.feedback = '';
   await loadTickets();
 };
+
+const formatDate = (value: string) => new Date(value).toLocaleString();
 
 onMounted(loadTickets);
 </script>
