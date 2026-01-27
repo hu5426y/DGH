@@ -1,9 +1,50 @@
 <template>
   <div class="page">
     <div class="section-title">我的工单</div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">全部工单</div>
+        <div class="metric-value">{{ tickets.length }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">处理中</div>
+        <div class="metric-value">{{ statusCounts.inProgress }}</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">已完成</div>
+        <div class="metric-value">{{ statusCounts.completed }}</div>
+      </div>
+    </div>
+
+    <div class="chip-group">
+      <button class="chip" :class="{ alt: activeFilter === 'all' }" @click="activeFilter = 'all'">全部</button>
+      <button
+        class="chip"
+        :class="{ alt: activeFilter === 'pending' }"
+        @click="activeFilter = 'pending'"
+      >
+        待处理
+      </button>
+      <button
+        class="chip"
+        :class="{ alt: activeFilter === 'in_progress' }"
+        @click="activeFilter = 'in_progress'"
+      >
+        处理中
+      </button>
+      <button
+        class="chip"
+        :class="{ alt: activeFilter === 'completed' }"
+        @click="activeFilter = 'completed'"
+      >
+        已完成
+      </button>
+      <button class="chip warn" @click="activeFilter = 'rating'">待评价</button>
+    </div>
+
     <van-empty v-if="loading" description="加载中..." />
     <div v-else class="page">
-      <div v-for="ticket in tickets" :key="ticket.id" class="card ticket-card">
+      <div v-for="ticket in filteredTickets" :key="ticket.id" class="card ticket-card">
         <div class="ticket-header">
           <div>
             <div style="font-weight: 600;">{{ ticket.title }}</div>
@@ -53,15 +94,35 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { api, type Ticket } from '../services/api';
 import { getAuth } from '../services/auth';
 
 const tickets = ref<Ticket[]>([]);
 const loading = ref(true);
+const activeFilter = ref<'all' | 'pending' | 'in_progress' | 'completed' | 'rating'>('all');
 const feedback = reactive({
   rating: 5,
   feedback: '',
+});
+
+const statusCounts = computed(() => {
+  return tickets.value.reduce(
+    (acc, ticket) => {
+      if (ticket.status === 'in_progress') acc.inProgress += 1;
+      if (ticket.status === 'completed') acc.completed += 1;
+      return acc;
+    },
+    { inProgress: 0, completed: 0 }
+  );
+});
+
+const filteredTickets = computed(() => {
+  if (activeFilter.value === 'all') return tickets.value;
+  if (activeFilter.value === 'rating') {
+    return tickets.value.filter((ticket) => ticket.status === 'completed' && !ticket.rating);
+  }
+  return tickets.value.filter((ticket) => ticket.status === activeFilter.value);
 });
 
 const statusText = (status: Ticket['status']) => {

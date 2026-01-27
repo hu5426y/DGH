@@ -12,6 +12,8 @@ import com.example.dgh.mapper.UserMapper;
 import com.example.dgh.util.PasswordUtil;
 import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +21,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Service
 public class AuthService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     private final UserMapper userMapper;
     private final StringRedisTemplate redisTemplate;
     private final AuthTokenStore tokenStore;
@@ -81,6 +84,7 @@ public class AuthService {
         String codeKey = "login:code:" + request.getPhone();
         redisTemplate.opsForValue().set(codeKey, code, Duration.ofMinutes(1));
         redisTemplate.opsForValue().set(cooldownKey, "1", Duration.ofMinutes(1));
+        LOGGER.info("Login verification code sent. phone={}, code={}", request.getPhone(), code);
     }
 
     public LoginResponse loginWithCode(LoginCodeRequest request) {

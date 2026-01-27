@@ -22,6 +22,11 @@
           <div class="metric-label">高频故障点</div>
         </div>
       </div>
+      <div class="chip-group" style="margin-top: 12px;">
+        <div class="chip">自动派单已启用</div>
+        <div class="chip alt">SLA 24h</div>
+        <div class="chip warn">关注超时工单</div>
+      </div>
       <div v-if="Object.keys(stats.frequentLocations).length" style="margin-top: 12px;">
         <div class="ticket-meta">高频故障点</div>
         <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px;">

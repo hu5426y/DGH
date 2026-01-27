@@ -10,6 +10,7 @@ import TechnicianView from './views/TechnicianView.vue';
 import AdminView from './views/AdminView.vue';
 import LoginView from './views/LoginView.vue';
 import RegisterView from './views/RegisterView.vue';
+import ProfileView from './views/ProfileView.vue';
 import './styles.css';
 import { getAuth } from './services/auth';
 
@@ -24,6 +25,7 @@ const router = createRouter({
     { path: '/user/tickets', component: TicketsView, meta: { role: 'USER' } },
     { path: '/repairer/home', component: TechnicianView, meta: { role: 'REPAIRER' } },
     { path: '/admin/home', component: AdminView, meta: { role: 'ADMIN' } },
+    { path: '/me', component: ProfileView },
   ],
 });
 
