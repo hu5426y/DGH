@@ -12,6 +12,50 @@
       </div>
     </section>
 
+    <section class="command-center card">
+      <div class="command-header">
+        <div>
+          <div class="section-title">指挥中枢</div>
+          <div class="command-sub">把校园报修“看得见”，让每一次响应都有时效。</div>
+        </div>
+        <div class="pulse-indicator">
+          <span class="pulse-dot"></span>
+          实时态势
+        </div>
+      </div>
+      <div class="command-grid">
+        <div class="signal-card">
+          <div class="signal-label">今日新增</div>
+          <div class="signal-value">28</div>
+          <div class="signal-meta">高危 3 · 待指派 5</div>
+        </div>
+        <div class="signal-card accent">
+          <div class="signal-label">SLA 达成</div>
+          <div class="signal-value">92%</div>
+          <div class="signal-meta">超时风险 2 起</div>
+        </div>
+        <div class="signal-card warn">
+          <div class="signal-label">满意度</div>
+          <div class="signal-value">4.8</div>
+          <div class="signal-meta">回访覆盖 76%</div>
+        </div>
+      </div>
+      <div class="command-map">
+        <div>
+          <div class="map-title">热点区域</div>
+          <div class="map-legend">北区/宿舍楼 · 教学楼</div>
+        </div>
+        <div class="map-grid">
+          <div class="map-cell active">A1</div>
+          <div class="map-cell">A2</div>
+          <div class="map-cell hot">B1</div>
+          <div class="map-cell">B2</div>
+          <div class="map-cell">C1</div>
+          <div class="map-cell active">C2</div>
+        </div>
+      </div>
+    </section>
+
     <div class="section-title">运行态势</div>
     <div class="metric-grid">
       <div class="metric-card">
