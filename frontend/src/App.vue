@@ -4,13 +4,18 @@
       <div class="brand">
         <div class="brand-mark">DGH</div>
         <div>
-          <div class="brand-title">设备报修指挥台</div>
-          <div class="brand-sub">校园·社区维保全流程</div>
+          <div class="brand-title">校园温暖服务台</div>
+          <div class="brand-sub">白天安心 · 夜晚守护</div>
         </div>
       </div>
       <div class="status-pill">
         <van-icon name="location-o" />
         在线 · 24h
+      </div>
+      <div class="theme-toggle">
+        <van-icon name="sunny-o" />
+        <van-switch v-model="isNight" size="20px" />
+        <van-icon name="moon-o" />
       </div>
       <van-button v-if="auth" size="small" plain type="primary" @click="logout">退出</van-button>
     </header>
@@ -33,13 +38,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { clearAuth, getAuth } from './services/auth';
 
 const route = useRoute();
 const router = useRouter();
 const auth = computed(() => getAuth());
+const isNight = ref(localStorage.getItem('dgh-theme') === 'night');
 
 const isAuthPage = computed(() => route.path === '/login' || route.path === '/register');
 const showTabbar = computed(() => !!auth.value && !isAuthPage.value);
@@ -73,4 +79,9 @@ const logout = () => {
   clearAuth();
   router.push('/login');
 };
+
+watchEffect(() => {
+  document.body.classList.toggle('theme-night', isNight.value);
+  localStorage.setItem('dgh-theme', isNight.value ? 'night' : 'day');
+});
 </script>

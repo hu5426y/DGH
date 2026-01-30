@@ -4,8 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.example.dgh.dto.AssignTicketRequest;
 import com.example.dgh.dto.CheckInRequest;
 import com.example.dgh.dto.CreateTicketRequest;
+import com.example.dgh.dto.AreaLeadResponse;
 import com.example.dgh.dto.FeedbackRequest;
+import com.example.dgh.dto.InsightSummaryResponse;
+import com.example.dgh.dto.IssueStatResponse;
+import com.example.dgh.dto.OpsOverviewResponse;
 import com.example.dgh.dto.StatsResponse;
+import com.example.dgh.dto.TechnicianPerformanceResponse;
 import com.example.dgh.dto.UpdateStatusRequest;
 import com.example.dgh.entity.CheckIn;
 import com.example.dgh.entity.Ticket;
@@ -160,6 +165,141 @@ public class TicketService {
             .map(ticket -> locationNames.getOrDefault(ticket.getLocationId(), "未知位置"))
             .collect(Collectors.groupingBy(name -> name, LinkedHashMap::new, Collectors.counting()));
         return new StatsResponse(total, completed, Math.round(avgRating * 100.0) / 100.0, frequentLocations);
+    }
+
+    public InsightSummaryResponse insightSummary() {
+        List<Ticket> tickets = ticketMapper.selectList(new LambdaQueryWrapper<>());
+        Map<String, String> locationNames = locationMapper.selectList(new LambdaQueryWrapper<Location>())
+            .stream()
+            .collect(Collectors.toMap(Location::getId, Location::getName, (a, b) -> a));
+
+        String highFrequencyArea = tickets.stream()
+            .map(ticket -> locationNames.getOrDefault(ticket.getLocationId(), "未知位置"))
+            .collect(Collectors.groupingBy(name -> name, Collectors.counting()))
+            .entrySet()
+            .stream()
+            .max(Map.Entry.comparingByValue())
+            .map(entry -> entry.getKey())
+            .orElse("暂无数据");
+
+        int averageResponseMinutes = (int) Math.round(tickets.stream()
+            .filter(ticket -> ticket.getStatus() != null && ticket.getStatus() != TicketStatus.PENDING)
+            .mapToLong(ticket -> java.time.Duration.between(ticket.getCreatedAt(), ticket.getUpdatedAt()).toMinutes())
+            .filter(minutes -> minutes >= 0)
+            .average()
+            .orElse(0));
+
+        int nightShiftPending = (int) tickets.stream()
+            .filter(ticket -> ticket.getStatus() == TicketStatus.IN_PROGRESS || ticket.getStatus() == TicketStatus.PENDING)
+            .count();
+
+        return new InsightSummaryResponse(highFrequencyArea, averageResponseMinutes, nightShiftPending);
+    }
+
+    public OpsOverviewResponse opsOverview() {
+        List<Ticket> tickets = ticketMapper.selectList(new LambdaQueryWrapper<>());
+        Map<String, String> locationNames = locationMapper.selectList(new LambdaQueryWrapper<Location>())
+            .stream()
+            .collect(Collectors.toMap(Location::getId, Location::getName, (a, b) -> a));
+
+        int slaHours = 24;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime slaDeadline = now.minusHours(slaHours);
+        LocalDateTime escalateDeadline = now.minusHours(48);
+
+        long overdueCount = tickets.stream()
+            .filter(ticket -> ticket.getStatus() != TicketStatus.COMPLETED)
+            .filter(ticket -> ticket.getCreatedAt() != null && ticket.getCreatedAt().isBefore(slaDeadline))
+            .count();
+
+        long escalatedCount = tickets.stream()
+            .filter(ticket -> ticket.getStatus() != TicketStatus.COMPLETED)
+            .filter(ticket -> ticket.getCreatedAt() != null && ticket.getCreatedAt().isBefore(escalateDeadline))
+            .count();
+
+        List<Ticket> completedTickets = tickets.stream()
+            .filter(ticket -> ticket.getStatus() == TicketStatus.COMPLETED)
+            .filter(ticket -> ticket.getCreatedAt() != null && ticket.getUpdatedAt() != null)
+            .collect(Collectors.toList());
+        long completedWithinSla = completedTickets.stream()
+            .filter(ticket -> ticket.getUpdatedAt().isBefore(ticket.getCreatedAt().plusHours(slaHours)))
+            .count();
+        double slaComplianceRate = completedTickets.isEmpty()
+            ? 0
+            : Math.round((completedWithinSla * 1000.0 / completedTickets.size())) / 10.0;
+
+        Map<String, List<Ticket>> ticketsByArea = tickets.stream()
+            .collect(Collectors.groupingBy(ticket -> locationNames.getOrDefault(ticket.getLocationId(), "未知位置")));
+        List<AreaLeadResponse> areaLeads = ticketsByArea.entrySet()
+            .stream()
+            .map(entry -> {
+                String area = entry.getKey();
+                List<Ticket> areaTickets = entry.getValue();
+                String suggestedLead = areaTickets.stream()
+                    .map(Ticket::getAssignedToName)
+                    .filter(name -> name != null && !name.isBlank())
+                    .collect(Collectors.groupingBy(name -> name, Collectors.counting()))
+                    .entrySet()
+                    .stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse("待分配");
+                return new AreaLeadResponse(area, areaTickets.size(), suggestedLead);
+            })
+            .sorted((a, b) -> Long.compare(b.getTicketCount(), a.getTicketCount()))
+            .limit(4)
+            .collect(Collectors.toList());
+
+        List<TechnicianPerformanceResponse> technicianPerformance = tickets.stream()
+            .filter(ticket -> ticket.getAssignedToName() != null && !ticket.getAssignedToName().isBlank())
+            .collect(Collectors.groupingBy(Ticket::getAssignedToName))
+            .entrySet()
+            .stream()
+            .map(entry -> {
+                String technician = entry.getKey();
+                List<Ticket> techTickets = entry.getValue();
+                long completed = techTickets.stream()
+                    .filter(ticket -> ticket.getStatus() == TicketStatus.COMPLETED)
+                    .count();
+                int avgMinutes = (int) Math.round(techTickets.stream()
+                    .filter(ticket -> ticket.getStatus() == TicketStatus.COMPLETED)
+                    .filter(ticket -> ticket.getCreatedAt() != null && ticket.getUpdatedAt() != null)
+                    .mapToLong(ticket -> java.time.Duration.between(ticket.getCreatedAt(), ticket.getUpdatedAt()).toMinutes())
+                    .filter(minutes -> minutes >= 0)
+                    .average()
+                    .orElse(0));
+                return new TechnicianPerformanceResponse(technician, techTickets.size(), completed, avgMinutes);
+            })
+            .sorted((a, b) -> Long.compare(b.getCompletedTickets(), a.getCompletedTickets()))
+            .limit(5)
+            .collect(Collectors.toList());
+
+        List<IssueStatResponse> issueStats = tickets.stream()
+            .map(Ticket::getTitle)
+            .filter(title -> title != null && !title.isBlank())
+            .collect(Collectors.groupingBy(title -> title, Collectors.counting()))
+            .entrySet()
+            .stream()
+            .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+            .limit(5)
+            .map(entry -> new IssueStatResponse(entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList());
+
+        long pendingFeedbackCount = tickets.stream()
+            .filter(ticket -> ticket.getStatus() == TicketStatus.COMPLETED)
+            .filter(ticket -> ticket.getRating() == null)
+            .count();
+
+        return new OpsOverviewResponse(
+            slaHours,
+            overdueCount,
+            slaComplianceRate,
+            areaLeads,
+            technicianPerformance,
+            issueStats,
+            pendingFeedbackCount,
+            escalatedCount
+        );
     }
 
     public List<Ticket> findOverdueTickets(int hours) {

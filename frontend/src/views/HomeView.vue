@@ -1,17 +1,38 @@
 <template>
   <div class="page">
-    <section class="hero">
-      <div class="hero-title">让报修从“盲点”变成“透明”</div>
+    <section class="hero hero-elevated">
+      <div class="hero-badge">校园温暖守护计划</div>
+      <div class="hero-title">白天安心运转，夜晚霓虹守护</div>
       <div class="hero-desc">
-        为校园与社区打造一套高效、可追踪的设备报修系统。图文+定位上报、自动派单、
-        超时提醒、数据统计，让每一条工单都有归属。
+        从报修到复盘，打造贴心服务旅程。支持白天/夜晚双模式，温暖视觉与霓虹守护
+        同步启用。
       </div>
       <div class="hero-actions">
-        <van-button type="primary" block round @click="go('/user/report')">立即报修</van-button>
-        <van-button plain block round @click="go('/user/tickets')">查看工单</van-button>
+        <van-button type="primary" block round @click="go('/user/report')">一键报修</van-button>
+        <van-button plain block round @click="go('/user/tickets')">我的工单</van-button>
+      </div>
+      <div class="hero-strip">
+        <div class="hero-strip-item">
+          <div class="strip-label">今日受理</div>
+          <div class="strip-value">{{ stats.total }}</div>
+        </div>
+        <div class="hero-strip-item">
+          <div class="strip-label">闭环完成</div>
+          <div class="strip-value">{{ stats.completed }}</div>
+        </div>
+        <div class="hero-strip-item">
+          <div class="strip-label">服务评分</div>
+          <div class="strip-value">{{ stats.avgRating }}</div>
+        </div>
       </div>
     </section>
 
+    <div class="section-title">今日温暖快报</div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-title">高频区域</div>
+        <div class="insight-value">{{ insights.highFrequencyArea }}</div>
+        <div class="ticket-meta">建议配置常驻维修员 + 备品库。</div>
     <section class="command-center card">
       <div class="command-header">
         <div>
@@ -62,17 +83,40 @@
         <div class="metric-value">{{ stats.total }}</div>
         <div class="metric-label">累计工单</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-value">{{ stats.completed }}</div>
-        <div class="metric-label">已完成</div>
+      <div class="insight-card">
+        <div class="insight-title">响应时长</div>
+        <div class="insight-value">{{ insights.averageResponseMinutes }} 分钟</div>
+        <div class="ticket-meta">较上周提升 12%，进入舒适服务区间。</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-value">{{ stats.avgRating }}</div>
-        <div class="metric-label">平均评分</div>
+      <div class="insight-card">
+        <div class="insight-title">夜间守护</div>
+        <div class="insight-value">{{ insights.nightShiftPending }} 单待协助</div>
+        <div class="ticket-meta">夜间值班提醒已发送。</div>
       </div>
-      <div class="metric-card">
-        <div class="metric-value">24h</div>
-        <div class="metric-label">超时预警阈值</div>
+    </div>
+
+    <div class="section-title">温暖体验设计</div>
+    <div class="experience-grid">
+      <div class="experience-card">
+        <div class="experience-icon">🌤️</div>
+        <div>
+          <div class="experience-title">白天明亮</div>
+          <div class="ticket-meta">柔和色温，信息层级清晰。</div>
+        </div>
+      </div>
+      <div class="experience-card">
+        <div class="experience-icon">🌙</div>
+        <div>
+          <div class="experience-title">夜间霓虹</div>
+          <div class="ticket-meta">深色界面，霓虹高亮提醒。</div>
+        </div>
+      </div>
+      <div class="experience-card">
+        <div class="experience-icon">🧭</div>
+        <div>
+          <div class="experience-title">过程可视</div>
+          <div class="ticket-meta">工单动态、签到、评价即时反馈。</div>
+        </div>
       </div>
     </div>
 
@@ -82,7 +126,7 @@
         <div class="flow-index">1</div>
         <div>
           <div style="font-weight: 600;">故障上报</div>
-          <div class="ticket-meta">文字+图片+定位，快速提交故障信息。</div>
+          <div class="ticket-meta">文字 + 图片 + 定位，快速提交故障信息。</div>
         </div>
       </div>
       <div class="flow-item">
@@ -138,6 +182,7 @@
 import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from '../services/api';
+import { fetchInsightSnapshot } from '../services/insights';
 
 const router = useRouter();
 const stats = reactive({
@@ -145,13 +190,22 @@ const stats = reactive({
   completed: 0,
   avgRating: 0,
 });
+const insights = reactive({
+  highFrequencyArea: '加载中...',
+  averageResponseMinutes: 0,
+  nightShiftPending: 0,
+});
 
 const go = (path: string) => {
   router.push(path);
 };
 
 onMounted(async () => {
-  const response = await api.get('/stats');
-  Object.assign(stats, response.data);
+  const [statsResponse, insightResponse] = await Promise.all([
+    api.get('/stats'),
+    fetchInsightSnapshot(),
+  ]);
+  Object.assign(stats, statsResponse.data);
+  Object.assign(insights, insightResponse);
 });
 </script>
