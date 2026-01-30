@@ -8,6 +8,7 @@ import ReportView from './views/ReportView.vue';
 import TicketsView from './views/TicketsView.vue';
 import TechnicianView from './views/TechnicianView.vue';
 import AdminView from './views/AdminView.vue';
+import AdminUsersView from './views/AdminUsersView.vue';
 import LoginView from './views/LoginView.vue';
 import RegisterView from './views/RegisterView.vue';
 import ProfileView from './views/ProfileView.vue';
@@ -25,6 +26,7 @@ const router = createRouter({
     { path: '/user/tickets', component: TicketsView, meta: { role: 'USER' } },
     { path: '/repairer/home', component: TechnicianView, meta: { role: 'REPAIRER' } },
     { path: '/admin/home', component: AdminView, meta: { role: 'ADMIN' } },
+    { path: '/admin/users', component: AdminUsersView, meta: { role: 'ADMIN' } },
     { path: '/me', component: ProfileView },
   ],
 });

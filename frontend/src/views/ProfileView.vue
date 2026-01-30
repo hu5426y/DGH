@@ -84,13 +84,42 @@
       </van-cell-group>
       <van-button size="small" type="primary" @click="savePreferences">保存偏好</van-button>
     </section>
+
+    <section class="card profile-section">
+      <div class="section-title">主题切换方式</div>
+      <div class="ticket-meta">手动与自动可随时切换，手动切换优先于系统时间。</div>
+      <van-cell-group inset>
+        <van-cell title="手动切换">
+          <template #right-icon>
+            <van-radio-group v-model="themeMode" direction="horizontal">
+              <van-radio name="manual">手动</van-radio>
+              <van-radio name="auto">自动</van-radio>
+            </van-radio-group>
+          </template>
+        </van-cell>
+        <van-cell title="当前主题">
+          <template #right-icon>
+            <div class="pill">{{ effectiveThemeLabel }}</div>
+          </template>
+        </van-cell>
+      </van-cell-group>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { showFailToast, showSuccessToast } from 'vant';
 import { getAuth, setAuth, type AuthState } from '../services/auth';
+import {
+  emitThemeUpdate,
+  getManualTheme,
+  getThemeMode,
+  getThemeOverride,
+  setThemeMode,
+  type ThemeMode,
+  type ThemeName,
+} from '../services/theme';
 
 const auth = ref<AuthState | null>(getAuth());
 
@@ -104,6 +133,10 @@ const intro = ref(localStorage.getItem(introStorageKey) || '');
 const preferences = reactive(
   JSON.parse(localStorage.getItem(preferenceStorageKey) || '{"sms":true,"wechat":true,"overdue":true}')
 );
+
+const themeMode = ref<ThemeMode>(getThemeMode());
+const manualTheme = ref<ThemeName>(getManualTheme());
+const themeOverride = ref<ThemeName | null>(getThemeOverride());
 
 const roleLabel = computed(() => {
   switch (auth.value?.roleCode) {
@@ -207,4 +240,33 @@ watch(
   () => persistPreferences(),
   { deep: true }
 );
+
+const effectiveThemeLabel = computed(() => {
+  const systemTheme =
+    new Date().getHours() >= 18 || new Date().getHours() < 6 ? 'night' : 'day';
+  const theme = themeMode.value === 'auto' ? themeOverride.value ?? systemTheme : manualTheme.value;
+  return theme === 'night' ? '夜晚' : '白天';
+});
+
+watch(
+  () => themeMode.value,
+  (value) => {
+    setThemeMode(value);
+    emitThemeUpdate();
+  }
+);
+
+const syncThemeFromStorage = () => {
+  themeMode.value = getThemeMode();
+  manualTheme.value = getManualTheme();
+  themeOverride.value = getThemeOverride();
+};
+
+onMounted(() => {
+  window.addEventListener('dgh-theme-updated', syncThemeFromStorage);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('dgh-theme-updated', syncThemeFromStorage);
+});
 </script>

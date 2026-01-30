@@ -808,7 +808,7 @@ body.theme-night .theme-toggle {
   .metric-grid,
   .role-grid,
   .summary-grid,
-  .hero-strip {
+  .hero-strip,
   .command-grid {
     grid-template-columns: 1fr;
   }

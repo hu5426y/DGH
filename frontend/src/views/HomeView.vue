@@ -33,6 +33,8 @@
         <div class="insight-title">高频区域</div>
         <div class="insight-value">{{ insights.highFrequencyArea }}</div>
         <div class="ticket-meta">建议配置常驻维修员 + 备品库。</div>
+      </div>
+    </div>
     <section class="command-center card">
       <div class="command-header">
         <div>

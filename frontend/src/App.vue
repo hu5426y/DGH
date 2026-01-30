@@ -38,14 +38,36 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { clearAuth, getAuth } from './services/auth';
+import {
+  emitThemeUpdate,
+  getManualTheme,
+  getThemeMode,
+  getThemeOverride,
+  initThemeStorage,
+  setManualTheme,
+  setThemeOverride,
+  type ThemeMode,
+  type ThemeName,
+} from './services/theme';
 
 const route = useRoute();
 const router = useRouter();
 const auth = computed(() => getAuth());
-const isNight = ref(localStorage.getItem('dgh-theme') === 'night');
+
+initThemeStorage();
+
+const themeMode = ref<ThemeMode>(getThemeMode());
+const manualTheme = ref<ThemeName>(getManualTheme());
+const themeOverride = ref<ThemeName | null>(getThemeOverride());
+const now = ref(Date.now());
+
+const isNight = computed({
+  get: () => effectiveTheme.value === 'night',
+  set: (value) => toggleTheme(value ? 'night' : 'day'),
+});
 
 const isAuthPage = computed(() => route.path === '/login' || route.path === '/register');
 const showTabbar = computed(() => !!auth.value && !isAuthPage.value);
@@ -68,6 +90,7 @@ const tabItems = computed(() => {
     case 'ADMIN':
       return [
         { label: '管理端', to: '/admin/home', icon: 'setting-o' },
+        { label: '人员', to: '/admin/users', icon: 'friends-o' },
         { label: '我的', to: '/me', icon: 'contact' },
       ];
     default:
@@ -80,8 +103,53 @@ const logout = () => {
   router.push('/login');
 };
 
+const getSystemTheme = () => {
+  const hour = new Date(now.value).getHours();
+  return hour >= 18 || hour < 6 ? 'night' : 'day';
+};
+
+const effectiveTheme = computed<ThemeName>(() => {
+  if (themeMode.value === 'auto') {
+    return themeOverride.value ?? getSystemTheme();
+  }
+  return manualTheme.value;
+});
+
+const toggleTheme = (nextTheme: ThemeName) => {
+  if (themeMode.value === 'auto') {
+    themeOverride.value = nextTheme;
+    setThemeOverride(nextTheme);
+    manualTheme.value = nextTheme;
+    setManualTheme(nextTheme);
+  } else {
+    manualTheme.value = nextTheme;
+    setManualTheme(nextTheme);
+  }
+  emitThemeUpdate();
+};
+
+const syncThemeFromStorage = () => {
+  themeMode.value = getThemeMode();
+  manualTheme.value = getManualTheme();
+  themeOverride.value = getThemeOverride();
+};
+
+let timer: number | undefined;
+onMounted(() => {
+  timer = window.setInterval(() => {
+    now.value = Date.now();
+  }, 60000);
+  window.addEventListener('dgh-theme-updated', syncThemeFromStorage);
+});
+
+onUnmounted(() => {
+  if (timer) {
+    window.clearInterval(timer);
+  }
+  window.removeEventListener('dgh-theme-updated', syncThemeFromStorage);
+});
+
 watchEffect(() => {
-  document.body.classList.toggle('theme-night', isNight.value);
-  localStorage.setItem('dgh-theme', isNight.value ? 'night' : 'day');
+  document.body.classList.toggle('theme-night', effectiveTheme.value === 'night');
 });
 </script>

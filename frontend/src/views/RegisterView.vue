@@ -53,7 +53,6 @@ const showRolePicker = ref(false);
 const roleOptions = [
   { text: '普通用户', value: 'USER' },
   { text: '维修人员', value: 'REPAIRER' },
-  { text: '管理员', value: 'ADMIN' },
 ];
 
 const form = reactive({

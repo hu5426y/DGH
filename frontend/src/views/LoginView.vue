@@ -53,6 +53,7 @@
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { showFailToast } from 'vant';
 import { api } from '../services/api';
 import { setAuth } from '../services/auth';
 
@@ -86,9 +87,13 @@ const goHome = (roleCode: string) => {
 };
 
 const loginPassword = async () => {
-  const res = await api.post('/auth/login/password', { ...passwordForm });
-  setAuth(res.data);
-  goHome(res.data.roleCode);
+  try {
+    const res = await api.post('/auth/login/password', { ...passwordForm });
+    setAuth(res.data);
+    goHome(res.data.roleCode);
+  } catch (error: any) {
+    showFailToast(error?.response?.data?.message || '账号或密码错误');
+  }
 };
 
 const sendCode = async () => {
@@ -97,15 +102,21 @@ const sendCode = async () => {
   try {
     await api.post('/auth/login/code/send', { phone: codeForm.phone });
     startCountdown();
+  } catch (error: any) {
+    showFailToast(error?.response?.data?.message || '手机号未注册或发送失败');
   } finally {
     sending.value = false;
   }
 };
 
 const loginCode = async () => {
-  const res = await api.post('/auth/login/code', { ...codeForm });
-  setAuth(res.data);
-  goHome(res.data.roleCode);
+  try {
+    const res = await api.post('/auth/login/code', { ...codeForm });
+    setAuth(res.data);
+    goHome(res.data.roleCode);
+  } catch (error: any) {
+    showFailToast(error?.response?.data?.message || '验证码错误或已过期');
+  }
 };
 
 const goRegister = () => {
