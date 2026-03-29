@@ -1,0 +1,26 @@
+# Thesis and local authoring assets
+论文/
+*.doc:Zone.Identifier
+
+# Local virtual environments
+.venv-thesis/
+.venv/
+venv/
+
+# Build outputs
+backend/target/
+backend/dist/
+frontend/dist/
+
+# Local dependencies
+backend/node_modules/
+frontend/node_modules/
+
+# Logs
+*.log
+
+# Editor and OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

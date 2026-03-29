@@ -20,6 +20,24 @@
 
 ## 本地运行
 
+### 一键启动 / 停止
+
+```bash
+./scripts/dev-up.sh
+./scripts/dev-status.sh
+./scripts/dev-down.sh
+```
+
+脚本内部基于 Docker Compose，会自动拉起 MySQL、Redis、Spring Boot 后端和前端页面。
+新电脑只需要先安装并启动 Docker Desktop，然后在项目根目录执行上面的命令即可。
+
+首次启动会自动初始化 `dgh` 数据库示例数据。
+如果需要彻底清空数据库卷后重启，可执行：
+
+```bash
+docker compose down -v
+```
+
 ### 1. 启动后端
 
 ```bash

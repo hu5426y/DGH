@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 DROP TABLE IF EXISTS check_ins;
 DROP TABLE IF EXISTS tickets;
 DROP TABLE IF EXISTS locations;

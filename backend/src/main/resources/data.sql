@@ -1,3 +1,5 @@
+SET NAMES utf8mb4;
+
 INSERT IGNORE INTO users (
   id, user_id, phone, password_hash, name, role_code, is_active, created_at, updated_at
 ) VALUES
