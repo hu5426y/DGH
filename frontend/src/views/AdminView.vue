@@ -113,8 +113,18 @@
         <van-tag :type="statusTag(ticket.status)">{{ statusText(ticket.status) }}</van-tag>
       </div>
       <div class="ticket-meta">{{ ticket.description }}</div>
-      <van-field v-model="assign.name" label="维修员" placeholder="输入维修员姓名" />
-      <van-field v-model="assign.contact" label="联系方式" placeholder="输入联系方式" />
+      <van-field
+        :model-value="assignments[ticket.id]?.name ?? ''"
+        label="维修员"
+        placeholder="输入维修员姓名"
+        @update:model-value="updateAssignment(ticket.id, 'name', $event)"
+      />
+      <van-field
+        :model-value="assignments[ticket.id]?.contact ?? ''"
+        label="联系方式"
+        placeholder="输入联系方式"
+        @update:model-value="updateAssignment(ticket.id, 'contact', $event)"
+      />
       <van-button size="small" type="primary" @click="assignTicket(ticket.id)">派单</van-button>
     </div>
   </div>
@@ -124,6 +134,7 @@
 import { onMounted, reactive, ref } from 'vue';
 import { api, type Ticket } from '../services/api';
 import { fetchOpsOverview, type OpsOverview } from '../services/ops';
+import { showFailToast, showSuccessToast } from 'vant';
 
 const tickets = ref<Ticket[]>([]);
 const stats = reactive({
@@ -132,10 +143,7 @@ const stats = reactive({
   avgRating: 0,
   frequentLocations: {} as Record<string, number>,
 });
-const assign = reactive({
-  name: '',
-  contact: '',
-});
+const assignments = reactive<Record<string, { name: string; contact: string }>>({});
 const ops = reactive<OpsOverview>({
   slaHours: 24,
   overdueCount: 0,
@@ -158,13 +166,26 @@ const loadData = async () => {
   Object.assign(ops, opsRes);
 };
 
+const updateAssignment = (ticketId: string, field: 'name' | 'contact', value: string) => {
+  if (!assignments[ticketId]) {
+    assignments[ticketId] = { name: '', contact: '' };
+  }
+  assignments[ticketId][field] = value;
+};
+
 const assignTicket = async (id: string) => {
+  const assignment = assignments[id] ?? { name: '', contact: '' };
+  if (!assignment.name.trim() || !assignment.contact.trim()) {
+    showFailToast('请完整填写维修员和联系方式');
+    return;
+  }
+
   await api.patch(`/tickets/${id}/assign`, {
-    assignedToName: assign.name,
-    assignedToContact: assign.contact,
+    assignedToName: assignment.name.trim(),
+    assignedToContact: assignment.contact.trim(),
   });
-  assign.name = '';
-  assign.contact = '';
+  assignments[id] = { name: '', contact: '' };
+  showSuccessToast('派单成功');
   await loadData();
 };
 

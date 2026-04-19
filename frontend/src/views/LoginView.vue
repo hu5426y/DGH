@@ -43,6 +43,34 @@
       </van-tabs>
     </div>
 
+    <div class="card auth-card">
+      <div class="section-title" style="margin-bottom: 12px;">演示账号</div>
+      <div class="chip-group">
+        <button
+          v-for="account in demoAccounts"
+          :key="account.userId"
+          class="chip"
+          :class="{ alt: passwordForm.userId === account.userId }"
+          type="button"
+          @click="applyDemoAccount(account)"
+        >
+          {{ account.label }}
+        </button>
+      </div>
+      <div class="ticket-meta" style="margin-top: 10px;">
+        默认密码：123456。点击上方角色可自动填入账号密码。
+      </div>
+      <div class="ops-list" style="margin-top: 12px;">
+        <div v-for="account in demoAccounts" :key="`${account.userId}-meta`" class="ops-row">
+          <div>
+            <div style="font-weight: 600;">{{ account.label }}</div>
+            <div class="ticket-meta">{{ account.userId }} / 123456</div>
+          </div>
+          <div class="pill">{{ account.role }}</div>
+        </div>
+      </div>
+    </div>
+
     <div class="auth-footer">
       <span>没有账号？</span>
       <van-button plain type="primary" size="small" @click="goRegister">去注册</van-button>
@@ -68,6 +96,12 @@ const passwordForm = reactive({
   password: '',
 });
 
+const demoAccounts = [
+  { label: '管理员', role: 'ADMIN', userId: 'demo_admin' },
+  { label: '学生', role: 'USER', userId: 'demo_student' },
+  { label: '维修工', role: 'REPAIRER', userId: 'demo_repairer' },
+];
+
 const codeForm = reactive({
   phone: '',
   code: '',
@@ -84,6 +118,12 @@ const goHome = (roleCode: string) => {
   } else {
     router.push('/admin/home');
   }
+};
+
+const applyDemoAccount = (account: { userId: string }) => {
+  activeTab.value = 0;
+  passwordForm.userId = account.userId;
+  passwordForm.password = '123456';
 };
 
 const loginPassword = async () => {

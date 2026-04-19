@@ -30,7 +30,7 @@
           required
         />
         <van-field
-          v-model="locationLabel"
+          :model-value="locationLabel"
           name="locationId"
           label="位置"
           placeholder="请选择位置"
@@ -55,16 +55,7 @@
 
     <div class="card form-card">
       <div style="font-weight: 600;">报修人信息</div>
-      <van-field
-        v-model="reporterLabel"
-        name="reporterId"
-        label="报修人"
-        placeholder="请选择报修人"
-        readonly
-        is-link
-        required
-        @click="showReporterPicker = true"
-      />
+      <van-field :model-value="reporterLabel" name="reporterId" label="报修人" readonly />
       <div class="ticket-meta">联系方式将在工单详情中自动显示。</div>
     </div>
 
@@ -77,85 +68,107 @@
     <van-popup v-model:show="showLocationPicker" position="bottom" round>
       <van-picker :columns="locationOptions" @confirm="onLocationConfirm" @cancel="showLocationPicker = false" />
     </van-popup>
-
-    <van-popup v-model:show="showReporterPicker" position="bottom" round>
-      <van-picker :columns="reporterOptions" @confirm="onReporterConfirm" @cancel="showReporterPicker = false" />
-    </van-popup>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
 import { api } from '../services/api';
+import { getAuth } from '../services/auth';
+import { showFailToast, showSuccessToast } from 'vant';
 
 const success = ref(false);
 const imageInput = ref('');
 const showLocationPicker = ref(false);
-const showReporterPicker = ref(false);
+const auth = getAuth();
 
 const form = reactive({
   title: '',
   description: '',
   locationId: '',
-  reporterId: '',
+  reporterId: auth?.id ?? '',
 });
 
 const locationOptions = ref<Array<{ text: string; value: string }>>([]);
-const reporterOptions = ref<Array<{ text: string; value: string }>>([]);
 
 const locationLabel = computed(() => {
   return locationOptions.value.find((item) => item.value === form.locationId)?.text ?? '';
 });
 
 const reporterLabel = computed(() => {
-  return reporterOptions.value.find((item) => item.value === form.reporterId)?.text ?? '';
+  if (!auth) return '未登录';
+  return `${auth.name} (${auth.phone})`;
 });
 
-const onLocationConfirm = (value: unknown) => {
-  const picked = Array.isArray(value) ? value[0] : value;
+type PickerConfirmPayload = {
+  selectedOptions?: Array<{ text?: string; value?: string | number }>;
+  selectedValues?: Array<string | number>;
+};
+
+const getPickedValue = (value: unknown) => {
+  const payload = value as PickerConfirmPayload | Array<{ value?: string | number }> | string | undefined;
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    const option = payload.selectedOptions?.[0];
+    if (option?.value != null) {
+      return String(option.value);
+    }
+    const selectedValue = payload.selectedValues?.[0];
+    if (selectedValue != null) {
+      return String(selectedValue);
+    }
+  }
+
+  const picked = Array.isArray(payload) ? payload[0] : payload;
   if (picked && typeof picked === 'object' && 'value' in picked) {
-    form.locationId = String((picked as { value: string }).value);
-  } else if (typeof picked === 'string') {
-    form.locationId = picked;
+    return String((picked as { value: string | number }).value);
+  }
+  if (typeof picked === 'string' || typeof picked === 'number') {
+    return String(picked);
+  }
+  return '';
+};
+
+const onLocationConfirm = (value: unknown) => {
+  const pickedValue = getPickedValue(value);
+  if (pickedValue) {
+    form.locationId = pickedValue;
   }
   showLocationPicker.value = false;
 };
 
-const onReporterConfirm = (value: unknown) => {
-  const picked = Array.isArray(value) ? value[0] : value;
-  if (picked && typeof picked === 'object' && 'value' in picked) {
-    form.reporterId = String((picked as { value: string }).value);
-  } else if (typeof picked === 'string') {
-    form.reporterId = picked;
-  }
-  showReporterPicker.value = false;
-};
-
 const onSubmit = async () => {
+  if (!form.locationId) {
+    showFailToast('请选择位置');
+    return;
+  }
+  if (!form.reporterId) {
+    showFailToast('请先登录后再提交报修');
+    return;
+  }
+
   const images = imageInput.value
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean);
-  await api.post('/tickets', { ...form, images });
-  success.value = true;
-  form.title = '';
-  form.description = '';
-  form.locationId = '';
-  form.reporterId = '';
-  imageInput.value = '';
+
+  try {
+    await api.post('/tickets', { ...form, images });
+    success.value = true;
+    showSuccessToast('提交成功');
+    form.title = '';
+    form.description = '';
+    form.locationId = '';
+    form.reporterId = auth?.id ?? '';
+    imageInput.value = '';
+  } catch (error: any) {
+    showFailToast(error?.response?.data?.message || '提交失败，请稍后重试');
+  }
 };
 
 const loadOptions = async () => {
-  const [locations, users] = await Promise.all([
-    api.get('/locations'),
-    api.get('/users', { params: { role_code: 'USER' } }),
-  ]);
+  const locations = await api.get('/locations');
   locationOptions.value = locations.data.map((item: { id: string; name: string }) => ({
     text: item.name,
-    value: item.id,
-  }));
-  reporterOptions.value = users.data.map((item: { id: string; name: string; phone: string }) => ({
-    text: `${item.name} (${item.phone})`,
     value: item.id,
   }));
 };
